@@ -26,13 +26,24 @@ export class CliListener {
    * 
    * @param validate_before If the new listener (and all its sub-listeners) need to check a constraint, you can specify
    * it here. The function must return a `boolean` or a `Promise<boolean>`.
+   * If {executor} is a `CliListener` instance, this will overwrite its previously set {validate_before}.
    * 
    * If the `boolean` is `true`, continue the execution normally (sub-listener then executor if none match).
    * 
    * If the `boolean` is `false`, the executor only will be called with its `validator_state` (third) parameter to `false`.
    */
-  addSubListener(match_on: string | RegExp | Array<string | RegExp>, executor: CliExecutor, validate_before?: CliValidator) {
-    const new_one = new CliListener(executor, validate_before);
+  addSubListener(match_on: string | RegExp | Array<string | RegExp>, executor: CliExecutor | CliListener, validate_before?: CliValidator) {
+    let new_one: CliListener;
+
+    if (executor instanceof CliListener) {
+      new_one = executor;
+      if (validate_before)
+        executor.validate_before = validate_before;
+    }
+    else {
+      new_one = new CliListener(executor, validate_before);
+
+    }
 
     if (Array.isArray(match_on)) {
       for (const e of match_on) {
