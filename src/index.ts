@@ -1,4 +1,5 @@
 import readline from 'readline';
+import stream from 'stream';
 
 type CliValidator = (rest: string, regex_matches: RegExpMatchArray | null) => boolean | Promise<boolean>;
 type CliExecutorFunction = (rest: string, regex_matches: RegExpMatchArray | null, validator_state?: boolean) => any;
@@ -127,7 +128,22 @@ export default class CliHelper extends CliListener {
     entries = entries.map(e => [e[0].padEnd(SIZE, " "), e[1]]);
     const content = entries.map(e => `${PAD_START}${e[0]}${e[1]}`).join('\n');
 
-    return `\n${title}\n${content}\n`; 
+    return `\n${title}\n${content}`; 
+  }
+
+  protected rl_interface: readline.Interface | undefined;
+
+  set pause(v: boolean) {
+    if (v) {
+      if (this.rl_interface) {
+        this.rl_interface.pause();
+      }
+    }
+    else {
+      if (this.rl_interface) {
+        this.rl_interface.resume();
+      }
+    }
   }
 
   /**
@@ -142,6 +158,8 @@ export default class CliHelper extends CliListener {
       output: process.stdout,
       prompt: '> '
     });
+
+    this.rl_interface = rl;
 
     rl.on('line', async line => {
       if (!line) {
