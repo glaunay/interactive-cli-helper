@@ -115,6 +115,21 @@ export default class CliHelper extends CliListener {
     console.warn(`Error encountered in CLI: ${error.message} (${error.stack})`);
   };
 
+  static formatHelp(title: string, commands: {
+    [name: string]: string
+  }) {
+    let entries = Object.entries(commands);
+    const PADDING = 3;
+
+    const SIZE = Math.max(...entries.map(e => e[0].length)) + PADDING;
+    const PAD_START = "    ";
+
+    entries = entries.map(e => [e[0].padEnd(SIZE, " "), e[1]]);
+    const content = entries.map(e => `${PAD_START}${e[0]}${e[1]}`).join('\n');
+
+    return `\n${title}\n${content}\n`; 
+  }
+
   /**
    * Starts the listening of `stdin`.
    * 
