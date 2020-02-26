@@ -132,27 +132,23 @@ export default class CliHelper extends CliListener {
   }
 
   protected rl_interface: readline.Interface | undefined;
+  protected paused = false;
 
   set pause(v: boolean) {
+    this.paused = v;
+
     if (v) {
       if (this.rl_interface) {
-        this.rl_interface.pause();
+        this.rl_interface.close();
       }
+      this.rl_interface = undefined;
     }
     else {
-      if (this.rl_interface) {
-        this.rl_interface.resume();
-      }
+      this.listen();
     }
   }
 
-  /**
-   * Starts the listening of `stdin`.
-   * 
-   * Before that, please define the keywords/patterns 
-   * you want to listen to with `.addSubListener()`.
-   */
-  listen() {
+  protected initReadline() {
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
@@ -162,6 +158,9 @@ export default class CliHelper extends CliListener {
     this.rl_interface = rl;
 
     rl.on('line', async line => {
+      if (this.paused) {
+        return;
+      }
       if (!line) {
         rl.prompt();
         return;
@@ -194,13 +193,25 @@ export default class CliHelper extends CliListener {
       // Reprompt for user input
       rl.prompt();
     }).on('close', () => {
+      if (this.paused) {
+        return;
+      }
       if (this.onclose) {
         this.onclose();
       }
       
       process.exit(0);
     });
+  }
 
-    rl.prompt();
+  /**
+   * Starts the listening of `stdin`.
+   * 
+   * Before that, please define the keywords/patterns 
+   * you want to listen to with `.addSubListener()`.
+   */
+  listen() {
+    this.initReadline();
+    this.rl_interface!.prompt();
   }
 }
