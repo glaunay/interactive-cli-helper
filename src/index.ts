@@ -132,21 +132,7 @@ export default class CliHelper extends CliListener {
   }
 
   protected rl_interface: readline.Interface | undefined;
-  protected paused = false;
-
-  set pause(v: boolean) {
-    this.paused = v;
-
-    if (v) {
-      if (this.rl_interface) {
-        this.rl_interface.close();
-      }
-      this.rl_interface = undefined;
-    }
-    else {
-      this.listen();
-    }
-  }
+  protected on_question = false;
 
   protected initReadline() {
     const rl = readline.createInterface({
@@ -158,7 +144,7 @@ export default class CliHelper extends CliListener {
     this.rl_interface = rl;
 
     rl.on('line', async line => {
-      if (this.paused) {
+      if (this.on_question) {
         return;
       }
       if (!line) {
@@ -193,14 +179,27 @@ export default class CliHelper extends CliListener {
       // Reprompt for user input
       rl.prompt();
     }).on('close', () => {
-      if (this.paused) {
-        return;
-      }
       if (this.onclose) {
         this.onclose();
       }
       
       process.exit(0);
+    });
+  }
+
+
+  question(question: string) : Promise<string> {
+    if (!this.rl_interface) {
+      this.initReadline();
+    }
+
+    this.on_question = true;
+
+    return new Promise(resolve => {
+      this.rl_interface!.question(question, answer => {
+        this.on_question = false;
+        resolve(answer);
+      });
     });
   }
 
@@ -211,6 +210,7 @@ export default class CliHelper extends CliListener {
    * you want to listen to with `.addSubListener()`.
    */
   listen() {
+    this.on_question = false;
     this.initReadline();
     this.rl_interface!.prompt();
   }
