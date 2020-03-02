@@ -118,7 +118,7 @@ export default class CliHelper extends CliListener {
 
   static formatHelp(title: string, commands: {
     [name: string]: string
-  }) {
+  }, on_no_match?: string) {
     let entries = Object.entries(commands);
     const PADDING = 3;
 
@@ -128,6 +128,14 @@ export default class CliHelper extends CliListener {
     entries = entries.map(e => [e[0].padEnd(SIZE, " "), e[1]]);
     const content = entries.map(e => `${PAD_START}${e[0]}${e[1]}`).join('\n');
 
+    if (on_no_match) {
+      return (rest: string) => {
+        if (rest.trim()) {
+          return on_no_match;
+        }
+        return `\n${title}\n${content}`;  
+      };
+    }
     return `\n${title}\n${content}`; 
   }
 
