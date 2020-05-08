@@ -424,6 +424,14 @@ export default class CliHelper extends CliListener {
   }
 
   /**
+   * Close the prompt session.
+   */
+  close() {
+    if (this.rl_interface)
+      this.rl_interface.close();
+  }
+
+  /**
    * Starts the listening of `stdin`.
    * 
    * Before that, please define the keywords 

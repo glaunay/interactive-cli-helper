@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import CliHelper, { CliExecutor, CliSuggestor, CliListener, CliValidator, CliListenerOptions } from ".";
+import CliHelper, { CliExecutor, CliSuggestor, CliListener, CliValidator } from ".";
 import { LISTENER_KEY, PROPERTY_METADATA_KEY } from "./helpers";
 
 export interface CliMainProps {
@@ -46,6 +46,8 @@ export class CliBase {
   async question(question: string) {
     return "";
   }
+
+  close() {}
 }
 
 function constructListenersFromObject(obj: any) {
@@ -107,6 +109,10 @@ export function CliMain(opts?: { suggestions?: boolean }) {
   
       question(question: string) {
         return this[LISTENER_KEY].question(question);
+      }
+
+      close() {
+        return this[LISTENER_KEY].close();
       }
     };
   }
