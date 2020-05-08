@@ -5,7 +5,7 @@
 ## Features
 
 - Assign commands (parts of string delimited by spaces) to functions or strings
-- Command auto-suggestion
+- Suggest commands with auto-completion
 - Wait for Promise completion when handler is a async function
 - Fancy console writing of results
 - `RegExp` based command support
