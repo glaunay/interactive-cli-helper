@@ -335,7 +335,7 @@ In the both following examples we're gonna use the created `database_help`.
 
 #### Functional example
 
-Assign the create executor in the second parameter of `.command()` method.
+Assign the created executor in the second parameter of `.command()` method.
 
 ```ts
 const database = cli.command('database', database_help);
