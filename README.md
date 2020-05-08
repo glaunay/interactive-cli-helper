@@ -2,6 +2,16 @@
 
 > Create a simple interactive CLI for your Node.js applications
 
+## Features
+
+- Assign commands (parts of string delimited by spaces) to functions or strings
+- Command auto-suggestion
+- Wait for Promise completion when handler is a async function
+- Fancy console writing of results
+- `RegExp` based command support
+- Question-asking to end-user
+- Fancy help messages
+
 ## Getting started
 
 Install the package with `npm`.
@@ -296,6 +306,51 @@ const validator: CliValidator = (rest: string, regex_matches: RegExpMatchArray |
 
 If the validator fails (returns `false`), then sub-commands will not be matched and 
 current failed command executor will be called with `validator_state` parameter to `false`.
+
+### Generate help messages
+
+If you want to have a fancy help message to display to users,
+you can use `CliHelper.formatHelp()` to generate a help executor:
+
+```ts
+const database_help: CliExecutor = CliHelper.formatHelp(/* the title */ 'database', {
+  /* Mandatory: available commands and description for them */
+  commands: {
+    'find': 'Find something in the database',
+    'destroy': 'Destroy something in the database'
+  },
+  /* 
+    CliExecutor, optional: Is called when {rest} is not empty (
+    so entered command hasn't matched anything) 
+  */
+  onNoMatch: (rest: string) => {
+    return `${rest} is not a valid command for database. For help, type "database".`;
+  },
+  /* Optional: Description to show under the title */
+  description: 'Helps to manage the database.',
+});
+```
+
+In the both following examples we're gonna use the created `database_help`.
+
+#### Functional example
+
+Assign the create executor in the second parameter of `.command()` method.
+
+```ts
+const database = cli.command('database', database_help);
+```
+
+#### Class-based example
+
+Put the created executor in the `executor` property of your class.
+
+```ts
+@CliCommand()
+class DatabaseCommand {
+  executor = database_help;
+}
+```
 
 ### Suggest manually
 
