@@ -9,5 +9,8 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^13.7.0"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.1.13"
   }
 }
