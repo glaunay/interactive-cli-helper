@@ -1,6 +1,6 @@
 # interactive-cli-helper
 
-> Create a simple interactive CLI for your Node.js applications
+> Create a simple interactive CLI for your Node.js application
 
 ## Features
 
