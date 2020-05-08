@@ -25,7 +25,7 @@ export type CliExecutorFunction = (rest: string, stack: CliStackItem[], regex_ma
 /**
  * Function to return suggestions from a given string.
  */
-export type CliSuggestor = (rest: string) => string[] | Promise<string[]>;
+export type CliSuggestor = (rest: string, stack: CliStackItem[]) => string[] | Promise<string[]>;
 /**
  * Valid object as executor. Can be a function (see `CliExecutorFunction`), a raw string or object.
  */
@@ -149,14 +149,10 @@ export class CliListener {
     return false;
   }
 
-  protected async getSuggests(rest: string, stop_on_next = false) : Promise<[string[], string]> {
+  protected async getSuggests(rest: string, stack: CliStackItem[], stop_on_next = false) : Promise<[string[], string]> {
     const matches: string[] = [];
 
     for (const matcher of this.listeners.keys()) {
-      if (matcher instanceof RegExp) {
-        continue;
-      }
-
       const splittedone = rest.split(/\s+/)[0];
       let stop = stop_on_next;
 
@@ -168,26 +164,43 @@ export class CliListener {
         stop = true;
       }
 
-      if (matcher.startsWith(splittedone) && this.isValid(rest.slice(matcher.length))) {
+      if (typeof matcher === 'string' && matcher.startsWith(splittedone) && this.isValid(rest.slice(matcher.length))) {
         const after_matcher = rest.slice(matcher.length);
         const size_after_tleft = after_matcher.trimLeft().length;
 
         const padding = after_matcher.slice(0, after_matcher.length - size_after_tleft) || " ";
 
-        const m_all = (await this.listeners.get(matcher)!.getSuggests(after_matcher.trimLeft(), stop))[0];
+        const m_all = (await this.listeners.get(matcher)!.getSuggests(after_matcher.trimLeft(), [...stack, matcher], stop))[0];
 
         matches.push(
           matcher,
           ...m_all.map(e => matcher + padding + e), 
         );
       }
+      else if (matcher instanceof RegExp) {
+        const reg_match = splittedone.match(matcher);
+
+        if (reg_match && this.isValid(rest.slice(reg_match[0].length))) {
+          const after_matcher = rest.slice(reg_match[0].length);
+          const size_after_tleft = after_matcher.trimLeft().length;
+
+          const padding = after_matcher.slice(0, after_matcher.length - size_after_tleft) || " ";
+
+          const m_all = (await this.listeners.get(matcher)!.getSuggests(after_matcher.trimLeft(), [...stack, [matcher, reg_match]], stop))[0];
+
+          matches.push(
+            reg_match[1],
+            ...m_all.map(e => reg_match[0] + padding + e), 
+          );
+        }
+      }
     }
 
-    if (matches.length === 0 && !stop_on_next && this.suggestor) {
-      const user_matches = await this.suggestor(rest);
+    if (!stop_on_next && this.suggestor) {
+      const user_matches = await this.suggestor(rest, stack);
 
       return [
-        user_matches, 
+        [...matches, ...user_matches], 
         rest
       ];
     }
@@ -336,7 +349,7 @@ export default class CliHelper extends CliListener {
           return [[], line];
         }
 
-        this.getSuggests(line)
+        this.getSuggests(line, [])
           .then(s => {
             callback(
               null, 
