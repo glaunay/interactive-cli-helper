@@ -40,7 +40,7 @@ export default class CliHelper extends CliListener {
   protected enable_suggestions: boolean;
   protected rl_interface: readline.Interface | undefined;
   protected on_question = false;
-
+  promptString:string = '>> ';
   /**
    * Build a new instance of `CliHelper`. 
    * 
@@ -135,7 +135,7 @@ export default class CliHelper extends CliListener {
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
-      prompt: '> ',
+      prompt: this.promptString,
       completer: this.enable_suggestions ? (line: string, callback: (err: any, value?: [string[], string]) => void) => {
         if (buffer) {
           // todo: complete when line is incomplete
@@ -182,7 +182,7 @@ export default class CliHelper extends CliListener {
           returned = e;
         }
         else {
-          returned = new Error(e);
+          returned = new Error(e as any);
         }
       }
 
