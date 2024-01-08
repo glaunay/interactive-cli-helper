@@ -24,7 +24,16 @@ export class CliListener {
     this.validator = options?.onValidateBefore;
     this.suggestor = options?.onSuggest;
   }
+  /** Make consecutive call to commands
+   * 
+   */
+  public injector(commands: Record<string, string>, execute:Record<string, ()=>string|Promise<string>>) {
+    for (let cmdName in execute) {
+      this.command(cmdName, execute[cmdName]);
+     // if (cmdName in commands)
 
+    }
+  }
   /**
    * Add a new command listener for {command_name}.
    *  

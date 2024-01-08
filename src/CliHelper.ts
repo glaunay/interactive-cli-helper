@@ -64,41 +64,6 @@ export default class CliHelper extends CliListener {
     console.warn(`Error encountered in CLI: ${error.message} (${error.stack})`);
   };
 
-  /**
-   * Provide a method to generate a handler that print help messages in a fancy way.
-   * 
-   * **{title}**: Title of help (generally, the command)
-   *
-   * **{options.commands}**: Available sub-commands on this handler.
-   * 
-   * **{options.description}**: Put a description below {title}.
-   * 
-   * **{options.onNoMatch}**: When user enter something that does not match after this command, this is executed.
-   * ```ts
-   * // Example: You defined help for "hello" with
-   * const help = CliHelper.formatHelp(
-   *   "hello", 
-   *   { 
-   *     commands: { foo: 'Foo description', world: 'Says "Hello world!"' }, 
-   *     onNoMatch: rest => `Subcommand "${rest}" does not exists for "hello".` 
-   *   }
-   * );
-   * 
-   * cli.command(
-   *  "hello", 
-   *  
-   * );
-   * 
-   * // Then, the following will happen in CLI:
-   * > hello t
-   * Cli: Subcommand "t" does not exists for "hello".
-   * > hello
-   * Cli:
-   * hello
-   *    foo   Foo description
-   *  world   Says "Hello world!"
-   * ```
-   */
   static formatHelp(title: string, options: {
     commands: {
       [name: string]: string
